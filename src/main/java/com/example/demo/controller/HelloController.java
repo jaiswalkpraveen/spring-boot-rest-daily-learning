@@ -12,52 +12,44 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.model.User;
-import com.example.demo.repository.UserRepository;
+import com.example.demo.service.UserService;
 
 @RestController
 @RequestMapping("/users") // base URL: /users
 public class HelloController {
 
     // private Map<Integer, User> users = new HashMap<>();
-    private final UserRepository repo;  // dependency
-
+    // private final UserRepository repo;  // dependency
+    private final UserService service;  // dependency
     // Constructor DI — Spring injects UserRepository bean here
-    public HelloController(UserRepository repo) {
-        this.repo = repo;
+    public HelloController(UserService service) {
+        this.service = service;
     }
 
 
     @GetMapping("/all")
     public Collection<User> getAllUsers(){
-        return repo.findAll();
+        return service.getAllUsers();
     }
 
     @GetMapping("/{id}")
     public User getUser(@PathVariable int id) {
-        return repo.findById(id).orElse(null);
+        return service.getUserById(id);
     }
 
   @PostMapping("/create")
-   public String createUser(@RequestBody User user){
+   public User createUser(@RequestBody User user){
     // you don't need to set the id, it will be auto-generated
-    repo.save(user);
-    return "User added successfully!"; 
+    return service.createUser(user);
   }
 
   @DeleteMapping("/{id}")
-  public String deleteUser(@PathVariable int id){
-    repo.deleteById(id);
-    return "User deleted successfully!";
+  public void deleteUser(@PathVariable int id){
+    service.deleteUser(id);
   }
 
   @PutMapping("/{id}")
   public User updateUser(@PathVariable int id, @RequestBody User user){
-      // Check if user exists before updating
-      if (repo.existsById(id)) {
-          repo.save(user);
-          return user;
-      } else {
-          throw new RuntimeException("User with ID " + id + " not found");
-      }
+    return service.updateUser(id, user);
   }
 }
