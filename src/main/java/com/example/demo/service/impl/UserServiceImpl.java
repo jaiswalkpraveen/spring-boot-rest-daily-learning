@@ -11,12 +11,15 @@ import java.util.ArrayList;
 
 import org.springframework.stereotype.Service;
 import java.util.List;
+
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+
     public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
+
     @Override
     public UserResponse createUser(UserRequest userRequest) {
         // Create user entity from request
@@ -46,10 +49,11 @@ public class UserServiceImpl implements UserService {
         return userResponse;
 
     }
+
     @Override
     public UserResponse getUserById(int id) {
         User user = userRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
         UserResponse userResponse = new UserResponse();
         userResponse.setId(user.getId());
         userResponse.setName(user.getName());
@@ -58,10 +62,11 @@ public class UserServiceImpl implements UserService {
         userResponse.setPhone(user.getUserDetails().getPhone());
         return userResponse;
     }
+
     @Override
     public UserResponse updateUserWithDetails(int id, UserRequest userRequest) {
         User user = userRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
         user.setName(userRequest.getName());
         user.setAge(userRequest.getAge());
         user.getUserDetails().setAddress(userRequest.getAddress());
@@ -75,6 +80,7 @@ public class UserServiceImpl implements UserService {
         userResponse.setPhone(updatedUser.getUserDetails().getPhone());
         return userResponse;
     }
+
     @Override
     public void deleteUser(int id) {
         userRepository.deleteById(id);

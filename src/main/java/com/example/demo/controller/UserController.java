@@ -13,46 +13,46 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.request.UserRequest;
 import com.example.demo.dto.response.UserResponse;
-import com.example.demo.entity.User;
 import com.example.demo.service.UserService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/users") // base URL: /users
 public class UserController {
 
-    // private Map<Integer, User> users = new HashMap<>();
-    // private final UserRepository repo;  // dependency
-    private final UserService service;  // dependency
-    // Constructor DI — Spring injects UserRepository bean here
-    public UserController(UserService service) {
-        this.service = service;
-    }
+  private final UserService service; // dependency
+  // Constructor DI — Spring injects UserRepository bean here
 
+  public UserController(UserService service) {
+    this.service = service;
+  }
 
-    @GetMapping("/all")
-    public List<UserResponse> getAllUsers(){
-        return service.getAllUsers();
-    }
+  @GetMapping("/all")
+  public List<UserResponse> getAllUsers() {
+    return service.getAllUsers();
+  }
 
-    @GetMapping("/{id}")
-    public UserResponse getUser(@PathVariable int id) {
-        return service.getUserById(id);
-    }
+  @GetMapping("/{id}")
+  public UserResponse getUser(@Valid @PathVariable int id) {
+    return service.getUserById(id);
+  }
 
   @PostMapping("/create")
-   public UserResponse createUser(@RequestBody UserRequest userRequest){
+  public UserResponse createUser(@Valid @RequestBody UserRequest userRequest) {
     // you don't need to set the id, it will be auto-generated
-    return service.createUser(userRequest); 
+    return service.createUser(userRequest);
   }
 
   @DeleteMapping("/{id}")
-  public void deleteUser(@PathVariable int id){
+  public void deleteUser(@Valid @PathVariable int id) {
     service.deleteUser(id);
   }
 
   @PutMapping("/{id}")
-  public UserResponse updateUser(@PathVariable int id, @RequestBody UserRequest userRequest){
-    return service.updateUserWithDetails(id, userRequest);  // update user with details (including user details) using the UserRequest object
+  public UserResponse updateUser(@Valid @PathVariable int id, @Valid @RequestBody UserRequest userRequest) {
+    return service.updateUserWithDetails(id, userRequest); // update user with details (including user details) using
+                                                           // the UserRequest object
   }
 
 }
