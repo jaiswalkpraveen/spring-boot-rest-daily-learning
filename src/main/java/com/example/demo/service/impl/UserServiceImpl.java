@@ -6,6 +6,7 @@ import com.example.demo.dto.request.UserRequest;
 import com.example.demo.dto.response.UserResponse;
 import com.example.demo.entity.User;
 import com.example.demo.entity.UserDetails;
+import com.example.demo.mapper.UserMapper;
 
 import java.util.ArrayList;
 
@@ -15,52 +16,33 @@ import java.util.List;
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
 
     @Override
     public UserResponse createUser(UserRequest userRequest) {
-        // Create user entity from request
-        User user = new User();
-        user.setName(userRequest.getName());
-        user.setAge(userRequest.getAge());
+        // Convert DTO -> Entity
+        User user = userMapper.toEntity(userRequest);
+        UserDetails userDetails = userMapper.toUserDetails(userRequest);
 
-        // Create user details entity from request
-        UserDetails userDetails = new UserDetails();
-        userDetails.setAddress(userRequest.getAddress());
-        userDetails.setPhone(userRequest.getPhone());
-
-        // Set user details in user
+        // Set bidirectional relationship
         user.setUserDetails(userDetails);
         userDetails.setUser(user);
 
-        // Save parent --> child auto saves because of cascade
-        User savedUser = userRepository.save(user);
-
-        // Covert Entity -> Response DTO manually
-        UserResponse userResponse = new UserResponse();
-        userResponse.setId(savedUser.getId());
-        userResponse.setName(savedUser.getName());
-        userResponse.setAge(savedUser.getAge());
-        userResponse.setAddress(savedUser.getUserDetails().getAddress());
-        userResponse.setPhone(savedUser.getUserDetails().getPhone());
-        return userResponse;
-
+        // Save and convert back to DTO
+        User saved = userRepository.save(user);
+        return userMapper.toUserResponse(saved);
     }
 
     @Override
     public UserResponse getUserById(int id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        UserResponse userResponse = new UserResponse();
-        userResponse.setId(user.getId());
-        userResponse.setName(user.getName());
-        userResponse.setAge(user.getAge());
-        userResponse.setAddress(user.getUserDetails().getAddress());
-        userResponse.setPhone(user.getUserDetails().getPhone());
-        return userResponse;
+        return userMapper.toUserResponse(user);
     }
 
     @Override
@@ -72,13 +54,7 @@ public class UserServiceImpl implements UserService {
         user.getUserDetails().setAddress(userRequest.getAddress());
         user.getUserDetails().setPhone(userRequest.getPhone());
         User updatedUser = userRepository.save(user);
-        UserResponse userResponse = new UserResponse();
-        userResponse.setId(updatedUser.getId());
-        userResponse.setName(updatedUser.getName());
-        userResponse.setAge(updatedUser.getAge());
-        userResponse.setAddress(updatedUser.getUserDetails().getAddress());
-        userResponse.setPhone(updatedUser.getUserDetails().getPhone());
-        return userResponse;
+        return userMapper.toUserResponse(updatedUser);
     }
 
     @Override
@@ -91,13 +67,7 @@ public class UserServiceImpl implements UserService {
         List<User> users = userRepository.findAll();
         List<UserResponse> userResponses = new ArrayList<>();
         for (User user : users) {
-            UserResponse userResponse = new UserResponse();
-            userResponse.setId(user.getId());
-            userResponse.setName(user.getName());
-            userResponse.setAge(user.getAge());
-            userResponse.setAddress(user.getUserDetails().getAddress());
-            userResponse.setPhone(user.getUserDetails().getPhone());
-            userResponses.add(userResponse);
+            userResponses.add(userMapper.toUserResponse(user));
         }
         return userResponses;
     }
