@@ -49,12 +49,10 @@ public class UserServiceImpl implements UserService {
     public UserResponse updateUserWithDetails(int id, UserRequest userRequest) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        user.setName(userRequest.getName());
-        user.setAge(userRequest.getAge());
-        user.getUserDetails().setAddress(userRequest.getAddress());
-        user.getUserDetails().setPhone(userRequest.getPhone());
-        User updatedUser = userRepository.save(user);
-        return userMapper.toUserResponse(updatedUser);
+
+        userMapper.updateUserFromRequest(userRequest, user);
+        userMapper.updateUserDetailsFromRequest(userRequest, user.getUserDetails());
+        return userMapper.toUserResponse(userRepository.save(user));
     }
 
     @Override
