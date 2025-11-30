@@ -69,4 +69,23 @@ public class UserServiceImpl implements UserService {
         }
         return userResponses;
     }
+
+    // serach users by keywords
+    public List<UserResponse> searchUsers(String keyword) {
+        List<User> users = userRepository.searchUsers(keyword);
+        List<UserResponse> userResponses = new ArrayList<>();
+        for (User user : users) {
+            userResponses.add(userMapper.toUserResponse(user));
+        }
+        return userResponses;
+    }
+
+    public List<UserResponse> getUsersByAgeRange(int minAge, int maxAge) {
+        List<User> users = userRepository.findByAgeBetween(minAge, maxAge);
+        List<UserResponse> userResponses = new ArrayList<>();
+        for (User user : users) {
+            userResponses.add(userMapper.toUserResponse(user));
+        }
+        return userResponses;
+    }
 }

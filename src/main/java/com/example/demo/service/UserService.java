@@ -14,4 +14,9 @@ public interface UserService {
     UserResponse updateUserWithDetails(int id, UserRequest userRequest);
 
     void deleteUser(int id);
+
+    List<UserResponse> searchUsers(String keyword);
+
+    List<UserResponse> getUsersByAgeRange(int minAge, int maxAge);
+
 }
