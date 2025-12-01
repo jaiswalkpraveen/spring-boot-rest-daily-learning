@@ -15,7 +15,7 @@ public interface UserService {
 
     void deleteUser(int id);
 
-    List<UserResponse> searchUsers(String keyword);
+    // List<UserResponse> searchUsers(String keyword);
 
     List<UserResponse> getUsersByAgeRange(int minAge, int maxAge);
 

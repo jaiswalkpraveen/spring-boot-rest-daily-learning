@@ -55,10 +55,10 @@ public class UserController {
                                                            // the UserRequest object
   }
 
-  @GetMapping("/search/{keyword}")
-  public List<UserResponse> searchUsers(@PathVariable String keyword) {
-    return service.searchUsers(keyword);
-  }
+  // @GetMapping("/search/{keyword}")
+  // public List<UserResponse> searchUsers(@PathVariable String keyword) {
+  // return service.searchUsers(keyword);
+  // }
 
   @GetMapping("/age-range/{minAge}/{maxAge}")
   public List<UserResponse> getUsersByAgeRange(@PathVariable int minAge, @PathVariable int maxAge) {
