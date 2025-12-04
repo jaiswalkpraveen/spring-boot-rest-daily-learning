@@ -1,93 +1,302 @@
-# Dependency Injection (DI) and Inversion of Control (IoC) in Spring Boot
+# Spring Boot REST API - Daily Learning Project
 
-## What is Dependency Injection (DI)?
+A production-ready REST API demonstrating core Spring Boot concepts including JPA relationships, validation, exception handling, and MapStruct integration.
 
-Dependency Injection (DI) is a design pattern used to implement IoC, where the control of creating and managing dependencies is transferred from the object itself to an external container or framework. Instead of an object creating its dependencies, they are injected by an external entity, promoting loose coupling and easier testing.
+## 📋 Table of Contents
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Database Schema](#database-schema)
+- [API Endpoints](#api-endpoints)
+- [Getting Started](#getting-started)
+- [Learning Resources](#learning-resources)
 
-### Key points:
-- Objects do not create dependencies themselves.
-- Dependencies are provided (injected) by an external source.
-- Improves modularity and testability.
+## 🎯 Overview
 
-## What is Inversion of Control (IoC)?
+This project is a comprehensive learning experience covering Spring Boot REST API development from basics to production-level features. It implements a User management system with Orders, demonstrating:
+- **One-to-One Relationship**: User ↔ UserDetails
+- **One-to-Many Relationship**: User → Orders
+- **DTO Pattern** with MapStruct for clean separation
+- **Bean Validation** for request validation
+- **Transaction Management** with `@Transactional`
 
-Inversion of Control (IoC) is a broader principle where the control flow of a program is inverted compared to traditional programming. Instead of the programmer controlling the flow, the framework or container controls it.
+## ✨ Features
 
-In the context of Spring:
-- The Spring container manages the lifecycle and dependencies of objects.
-- Objects receive their dependencies from the container rather than constructing them.
+### Implemented
+- ✅ **CRUD Operations** for Users and Orders
+- ✅ **JPA Relationships** (One-to-One, One-to-Many)
+- ✅ **DTO/Entity Mapping** using MapStruct
+- ✅ **Validation** with Bean Validation API
+- ✅ **Custom JPQL Queries** (search, filter, pagination support)
+- ✅ **Transaction Management**
 
-## How Spring Boot Performs DI
+### In Progress
+- 🚧 **Global Exception Handler** (theory documented)
+- 🚧 **Many-to-Many Relationship** (User ↔ Roles)
 
-Spring Boot uses the Spring Framework's IoC container to manage beans (objects). It automatically scans for components, creates instances, and injects dependencies where needed.
+### Planned
+- 📝 Logging with SLF4J
+- 📝 Unit & Integration Tests
+- 📝 Spring Security + JWT
+- 📝 API Documentation (Swagger/OpenAPI)
+- 📝 Caching
+- 📝 Docker containerization
 
-### Steps:
-1. Spring scans the classpath for classes annotated with stereotype annotations like `@Component`, `@Service`, `@Repository`, etc.
-2. It creates instances of those classes and registers them as beans in the IoC container.
-3. Dependencies are injected into beans via constructor injection, setter injection, or field injection using `@Autowired`.
-4. When a bean is requested, Spring provides the fully initialized object with all dependencies injected.
+## 🛠️ Tech Stack
 
-## What Happens When `SpringApplication.run()` Executes?
+| Category | Technology |
+|----------|-----------|
+| **Framework** | Spring Boot 3.5.7 |
+| **Language** | Java 21 |
+| **Database** | MySQL 8.0 |
+| **ORM** | Spring Data JPA (Hibernate) |
+| **Mapper** | MapStruct 1.5.5 |
+| **Validation** | Jakarta Bean Validation |
+| **Build Tool** | Maven |
+| **Utilities** | Lombok |
 
-1. **Bootstrap**: Spring Boot starts the application by bootstrapping the Spring context.
-2. **Component Scan**: It scans the base package and sub-packages for annotated classes.
-3. **Bean Creation**: Spring creates beans for all detected components.
-4. **Dependency Injection**: It injects dependencies into beans based on annotations like `@Autowired`.
-5. **Application Context Ready**: The application context (IoC container) is fully initialized.
-6. **Application Starts**: The main application runs, and beans are ready to be used.
+## 📁 Project Structure
 
-## Example Code: Car and Engine
+```
+src/main/java/com/example/demo/
+├── AppConfig.java                 # Main Spring Boot application
+├── controller/
+│   ├── UserController.java        # User REST endpoints
+│   └── OrderController.java       # Order REST endpoints
+├── dto/
+│   ├── request/
+│   │   ├── UserRequest.java       # User creation/update DTO
+│   │   └── OrderRequest.java      # Order creation DTO
+│   └── response/
+│       ├── UserResponse.java      # User API response
+│       └── OrderResponse.java     # Order API response
+├── entity/
+│   ├── User.java                  # User JPA entity
+│   ├── UserDetails.java           # UserDetails JPA entity (1:1)
+│   ├── Order.java                 # Order JPA entity (N:1)
+│   └── Role.java                  # Role JPA entity (N:M - in progress)
+├── exception/
+│   ├── ErrorResponse.java         # Standard error response DTO
+│   └── ResourceNotFoundException.java # Custom 404 exception
+├── mapper/
+│   └── UserMapper.java            # MapStruct interface
+├── repository/
+│   ├── UserRepository.java        # User data access
+│   ├── UserDetailsRepository.java # UserDetails data access
+│   ├── OrderRepository.java       # Order data access
+│   └── RoleRepository.java        # Role data access
+├── service/
+│   ├── UserService.java           # User business logic interface
+│   ├── OrderService.java          # Order business logic interface
+│   └── impl/
+│       ├── UserServiceImpl.java   # User service implementation
+│       └── OrderServiceImpl.java  # Order service implementation
+└── validation/
+    ├── UserConstraints.java       # Shared validation interface
+    └── OrderConstraint.java       # Order validation interface
+```
 
-```java
-@Component
-public class Engine {
-    public void start() {
-        System.out.println("Engine started");
-    }
-}
+## 🗄️ Database Schema
 
-@Component
-public class Car {
-    private final Engine engine;
+```sql
+┌─────────────┐       ┌──────────────┐       ┌─────────────┐
+│   users     │       │ user_details │       │   orders    │
+├─────────────┤       ├──────────────┤       ├─────────────┤
+│ id (PK)     │◄─────►│ id (PK)      │   ┌───│ id (PK)     │
+│ name        │ 1:1   │ user_id (FK) │   │   │ user_id (FK)│
+│ age         │       │ address      │   │   │ product     │
+└─────────────┘       │ phone        │   │   │ amount      │
+                      └──────────────┘   │   │ order_date  │
+                                         │   └─────────────┘
+                                         │        N:1
+                                         └────────┘
+```
 
-    @Autowired
-    public Car(Engine engine) {
-        this.engine = engine;
-    }
+### Relationships
+- **User** ↔ **UserDetails**: One-to-One (bidirectional, `cascade = ALL`)
+- **User** → **Orders**: One-to-Many (bidirectional, `cascade = ALL`, `orphanRemoval = true`)
+- **Order** → **User**: Many-to-One (LAZY fetch)
 
-    public void drive() {
-        engine.start();
-        System.out.println("Car is driving");
-    }
+## 🔌 API Endpoints
+
+### User Management
+
+| Method | Endpoint | Description | Request Body | Response |
+|--------|----------|-------------|--------------|----------|
+| GET | `/users/all` | Get all users | - | `List<UserResponse>` |
+| GET | `/users/{id}` | Get user by ID | - | `UserResponse` |
+| POST | `/users/create` | Create new user | `UserRequest` | `UserResponse` |
+| PUT | `/users/update/{id}` | Update user | `UserRequest` | `UserResponse` |
+| DELETE | `/users/delete/{id}` | Delete user | - | - |
+| GET | `/users/age-range/{minAge}/{maxAge}` | Get users by age range | - | `List<UserResponse>` |
+
+**UserRequest Example:**
+```json
+{
+  "name": "John Doe",
+  "age": 30,
+  "address": "123 Main St",
+  "phone": "555-1234"
 }
 ```
 
-In this example:
-- `Engine` and `Car` are Spring-managed beans.
-- `Car` depends on `Engine`, which is injected via constructor injection.
-- When `car.drive()` is called, the engine starts first.
+### Order Management
 
-## Key Annotations
+| Method | Endpoint | Description | Request Body | Response |
+|--------|----------|-------------|--------------|----------|
+| GET | `/users/{userId}/orders` | Get all orders for a user | - | `List<OrderResponse>` |
+| GET | `/users/{userId}/orders/{orderId}` | Get specific order | - | `OrderResponse` |
+| POST | `/users/{userId}/orders` | Create order for user | `OrderRequest` | `OrderResponse` |
+| DELETE | `/users/{userId}/orders/{orderId}` | Delete order | - | - |
 
-| Annotation     | Description                                                                                 |
-|----------------|---------------------------------------------------------------------------------------------|
-| `@Component`   | Marks a class as a Spring-managed component (bean).                                        |
-| `@Autowired`   | Marks a constructor, setter, or field to be injected with a matching bean from the context.|
-| `@Primary`     | Marks a bean as the primary candidate when multiple beans of the same type exist.          |
-| `@Qualifier`   | Specifies which bean to inject when multiple candidates are available.                      |
+**OrderRequest Example:**
+```json
+{
+  "product": "Laptop",
+  "amount": 1200.50
+}
+```
 
-## Summary Table of DI and IoC Concepts
+## 🚀 Getting Started
 
-| Concept                  | Description                                                                                   |
-|--------------------------|-----------------------------------------------------------------------------------------------|
-| Dependency Injection (DI)| Pattern where dependencies are provided to objects rather than created by them.               |
-| Inversion of Control (IoC)| Principle where the framework controls the flow and creation of objects instead of the program.|
-| Spring IoC Container      | Manages beans and their lifecycle, performs DI automatically.                                 |
-| Bean                      | An object managed by the Spring container.                                                   |
-| Component Scan            | Process of detecting beans via annotations in specified packages.                            |
-| Injection Types           | Constructor, Setter, Field injection using `@Autowired`.                                    |
+### Prerequisites
+- Java 21+
+- Maven 3.6+
+- MySQL 8.0+
+
+### Database Setup
+```sql
+CREATE DATABASE spring_boot_learning;
+```
+
+Update `src/main/resources/application.yml`:
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/spring_boot_learning
+    username: your_username
+    password: your_password
+```
+
+### Run Application
+```bash
+# Clone repository
+git clone https://github.com/jaiswalkpraveen/spring-boot-rest-daily-learning.git
+cd spring-boot-rest-daily-learning
+
+# Build project
+mvn clean install
+
+# Run application
+mvn spring-boot:run
+```
+
+The API will be available at `http://localhost:8080`
+
+### Test Endpoints
+```bash
+# Create a user
+curl -X POST http://localhost:8080/users/create \
+-H "Content-Type: application/json" \
+-d '{"name":"Alice","age":25,"address":"NYC","phone":"555-0001"}'
+
+# Get all users
+curl http://localhost:8080/users/all
+
+# Create an order
+curl -X POST http://localhost:8080/users/1/orders \
+-H "Content-Type: application/json" \
+-d '{"product":"Laptop","amount":1200.50}'
+```
+
+## 📚 Learning Resources
+
+This repository includes comprehensive learning materials:
+
+- **[3_DAY_INTENSIVE_ROADMAP.md](./3_DAY_INTENSIVE_ROADMAP.md)** - 3-day plan for SDET → SDE transition
+- **[LEARNING_PATH.md](./LEARNING_PATH.md)** - 4-6 week comprehensive learning path
+- **[SPRING_BOOT_ANNOTATIONS.md](./SPRING_BOOT_ANNOTATIONS.md)** - Categorized list of all annotations used
+- **[ORDER_CREATION_FLOW.md](./ORDER_CREATION_FLOW.md)** - Visual diagram of order creation flow
+- **[GLOBAL_EXCEPTION_HANDLER_THEORY.md](./GLOBAL_EXCEPTION_HANDLER_THEORY.md)** - Exception handling guide
+
+## 🎓 Key Concepts Demonstrated
+
+### 1. Dependency Injection & IoC
+Spring Boot's IoC container manages beans and injects dependencies automatically.
+
+### 2. MapStruct Integration
+Compile-time, type-safe object mapping:
+```java
+@Mapper(componentModel = "spring")
+public interface UserMapper {
+    UserResponse toUserResponse(User user);
+    User toEntity(UserRequest request);
+}
+```
+
+### 3. Validation with Shared Interfaces
+```java
+public interface UserConstraints {
+    @NotBlank(message = "Name is required")
+    String getName();
+    
+    @NotNull @Positive
+    Integer getAge();
+}
+```
+
+### 4. JPA Relationships
+- **One-to-One**: Bidirectional with `mappedBy`
+- **One-to-Many**: Parent-child with cascade operations
+- Helper methods to maintain bidirectional consistency
+
+### 5. Transaction Management
+```java
+@Transactional
+public class OrderServiceImpl {
+    // All operations within a single transaction
+}
+```
+
+## 📝 Annotations Reference
+
+### Core Annotations
+- `@SpringBootApplication` - Main application entry point
+- `@RestController` - REST API controller
+- `@Service` - Business logic layer
+- `@Repository` - Data access layer
+- `@Transactional` - Transaction boundary
+
+### JPA Annotations
+- `@Entity`, `@Table` - Entity mapping
+- `@Id`, `@GeneratedValue` - Primary key
+- `@OneToOne`, `@OneToMany`, `@ManyToOne` - Relationships
+- `@JoinColumn`, `@JoinTable` - Foreign keys
+
+### Validation
+- `@Valid` - Trigger validation
+- `@NotNull`, `@NotBlank` - Required fields
+- `@Positive` - Numeric constraints
+
+### MapStruct
+- `@Mapper` - Define mapper interface
+- `@Mapping` - Configure field mappings
+- `@MappingTarget` - Update existing objects
+
+## 🤝 Contributing
+
+This is a learning project. Feel free to fork and experiment!
+
+## 📄 License
+
+This project is for educational purposes.
+
+## 👤 Author
+
+**Praveen Jaiswal**  
+GitHub: [@jaiswalkpraveen](https://github.com/jaiswalkpraveen)
 
 ---
 
-Keep these notes handy for quick revision of how Spring Boot manages dependencies and the underlying principles of IoC and DI.
-
+*Built with ❤️ while learning Spring Boot*
